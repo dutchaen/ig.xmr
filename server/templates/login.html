@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram</title>
+    <link rel="stylesheet" href="/static/styles/general.css?version=6">
+    <link rel="icon" href="https://static.cdninstagram.com/rsrc.php/y4/r/QaBlI0OZiks.ico">
+    <script type="text/javascript" src="/static/scripts/kit.js"></script>
+    <script type="text/javascript" src="/static/scripts/types.js"></script>
+    <script type="text/javascript" src="/static/scripts/fn_types.js"></script>
+    <script type="text/javascript" src="/static/scripts/navbar.js"></script>
+    <script type="text/javascript" src="/static/scripts/ig_webkit.js"></script>
+    <script type="text/javascript" src="/static/scripts/xmr.js"></script>
+</head>
+<body>
+
+    <center>
+        <div class="instagram-login-signup-content">
+
+            <div class="instagram-login-signup-content-row-container">
+                <div class="instagram-login-signup-content-row">
+                    <div class="instagram-login-signup-mobile-view">
+                        <img src="/static/images/iphone3.png" height="550">
+                    </div>
+    
+    
+                    <div class="instagram-login-signup-controls">
+                        <div class="instagram-login-signup-border">
+                            <div class="instagram-login-content">
+                                <div class="instagram-login-signup-logo">
+                                    <i data-visualcompletion="css-img" aria-label="Instagram" class="" role="img" style="background-image: url(&quot;https://static.cdninstagram.com/rsrc.php/v3/yM/r/8n91YnfPq0s.png&quot;); background-position: 0px -52px; background-size: auto; width: 175px; height: 51px; background-repeat: no-repeat; display: inline-block;"></i>
+                                </div>
+                
+                                 <input id="username" placeholder="Phone number, username, or email" spellcheck="false">
+                                <input id="password" type="password" placeholder="Password" spellcheck="false">
+                                <button id="login-button" disabled>
+                                    <div class="instagram-login-signup-button-content" id="instagram-login-signup-button-content">
+                                        <a>Log in</a>
+                                    </div>
+                                </button>
+                
+                                <div class="instagram-login-signup-divider">
+                                    <div class="instagram-login-signup-divider-line-holder">
+                                        <div class="instagram-login-signup-divider-line"></div>
+                                    </div>
+                                    
+                                    <a class="instagram-login-signup-divider-text">OR</a>
+                
+                                    <div class="instagram-login-signup-divider-line-holder">
+                                        <div class="instagram-login-signup-divider-line"></div>
+                                    </div>
+                                </div>
+                
+                
+                                <a href="/" class="instagram-login-redirect-button-text">Reset your password?</a>
+                                <a id="instagram-server-response" class="instagram-server-response"></a>
+                            </div>
+                        </div>
+            
+                        <div class="instagram-login-signup-border">
+            
+                            <div class="instagram-signup-redirect-content">
+                                <a>Don't have an account?<a href="/accounts/signup" class="instagram-login-redirect-button-text">Sign up</a></a>
+                            </div>
+                            
+                        </div>
+                    </div>
+    
+                </div>
+            </div>
+        </div>
+    </center>
+
+</body>
+
+<script>
+    let xmr = new XMR();
+
+    let username_element = document.getElementById('username');
+    let password_element = document.getElementById('password');
+    let server_response_element = document.getElementById('instagram-server-response');
+    let login_button = document.getElementById('login-button');
+
+    let can_click_login_fn = (e) => {
+        let username = username_element.value;
+        let password = password_element.value;
+
+        login_button.disabled = !(username.length > 1 && password.length >= 6);
+    };
+
+
+    username_element.onkeypress = can_click_login_fn;
+    password_element.onkeypress = can_click_login_fn;
+
+
+    function Page_CreateSpinner() {
+        var xmlns = 'http://www.w3.org/2000/svg';
+        let loader0 = document.createElement("div");
+        loader0.className = 'loader';
+        return loader0;
+    }
+
+
+    login_button.onclick = (e) => {
+        login_button.disabled = true;
+        
+
+        let username = document.getElementById('username').value;
+        let password = document.getElementById('password').value;
+
+        let button_content = document.getElementById('instagram-login-signup-button-content');
+        Page_RemoveAllChildNodes(button_content);
+        button_content.appendChild( Page_CreateSpinner() );
+
+
+        (async () => {
+            await sleep(2000);
+            xmr.Guest.login(username, password)
+                .then((result) => {
+                    if (result['error'] == null) {
+                        window.location.href = '/';
+                    }
+                })
+                .catch((e) => {
+
+                    login_button.disabled = false;
+                    Page_RemoveAllChildNodes(button_content);
+                    let text_element = document.createElement('a');
+                    text_element.innerText = 'Log in';
+                    button_content.appendChild(text_element);
+
+                    server_response_element.style.display = 'block';
+                    try {
+                        let error_json = JSON.parse(e.message);
+                        server_response_element.innerText = error_json['error'];
+                    }
+                    catch {
+                        server_response_element.innerText = 'There was an error with your request.';
+                        
+                    } 
+                    
+                });
+            
+        })();
+    }
+
+</script>
+</html>

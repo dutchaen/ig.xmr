@@ -1,0 +1,213 @@
+:root {
+    --instagram-bg: white;
+    --instagram-fg: black;
+    --instagram-border: lightgrey;
+}
+
+html, body {
+    background-color: var(--instagram-bg);
+    color: var(--instagram-fg);
+    font-weight: 700;
+    transition: 1.2s;
+
+    box-sizing: border-box;
+    margin: 0;
+}
+
+* {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+hr {
+    margin: 0px;
+    width: 100%;
+    color: transparent;
+    border-top: 1px solid var(--instagram-border);
+    transition: 1.2s;
+}
+
+.instagram-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+}
+
+
+.instagram-header {
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 700px;
+}
+
+.instagram-header-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-bottom: 1px solid lightgray;
+}
+
+.instagram-login-button {
+    color: white;
+    padding: 7px 17px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
+    background-color: rgb(40, 149, 246);
+    font-weight: 700;
+}
+
+.instagram-sign-up-button {
+    color: rgb(43, 112, 214);
+    padding: 7px 17px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
+    background-color: transparent;
+    font-weight: 700;
+}
+
+.instagram-header-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.instagram-theme-swap-button {
+    color: rgb(214, 43, 185);
+    padding: 7px 17px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
+    background-color: transparent;
+    font-weight: 700;
+}
+
+.instagram-theme-swap-button:hover {
+    cursor: pointer;
+    color: rgba(214, 43, 185, 0.555);
+}
+
+
+.instagram-login-button:hover {
+    cursor: pointer;
+    background-color: rgba(0, 149, 246, 0.555);
+}
+
+.instagram-sign-up-button:hover {
+    cursor: pointer;
+    color: rgba(43, 111, 214, 0.555);
+}
+
+.instagram-profile {
+    width: 800px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    gap: 75px;
+    padding: 20px;
+}
+
+.instagram-profile-picture img {
+    border-radius: 100px;
+    border: 1px solid lightgrey;
+}
+
+.instagram-profile-data {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+
+}
+
+.instagram-profile-username-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    gap: 25px;
+
+}
+
+.instagram-profile-username-container p {
+    font-weight: 500;
+    font-size: 20px;
+}
+
+.instagram-profile-username-container button {
+    color: black;
+    padding: 6px 17px;
+    border-radius: 6px;
+    border: none;
+    background-color: rgba(230, 231, 235, 0.767);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+
+.instagram-profile-username-container button:hover {
+    cursor: pointer;
+    background-color: rgba(163, 163, 163, 0.952);
+}
+
+.instagram-profile-following-container {
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.instagram-profile-following-container p {
+    margin: 10px 0px;
+}
+
+.instagram-profile-name-container {
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.instagram-profile-name-container p {
+    margin: 10px 0px;
+}
+
+.instagram-profile-bio-container {
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.instagram-profile-bio-container p {
+    margin: 0px 0px;
+}
+
+.instagram-profile-handle-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.instagram-header-toolbox {
+    display: flex;
+    flex-direction: row;
+    gap: 18px;
+}
+
+#instagram-my-icon {
+    border-radius: 100px;
+}
+
+.instagram-toolbox-icon:hover {
+    cursor: pointer;
+}

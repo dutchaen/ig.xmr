@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram</title>
+    <link rel="stylesheet" href="/static/styles/general.css?version=3">
+    <link rel="icon" href="https://static.cdninstagram.com/rsrc.php/y4/r/QaBlI0OZiks.ico">
+    <script type="text/javascript" src="/static/scripts/kit.js"></script>
+    <script type="text/javascript" src="/static/scripts/types.js"></script>
+    <script type="text/javascript" src="/static/scripts/fn_types.js"></script>
+    <script type="text/javascript" src="/static/scripts/navbar.js"></script>
+    <script type="text/javascript" src="/static/scripts/ig_webkit.js"></script>
+    <script type="text/javascript" src="/static/scripts/xmr.js"></script>
+</head>
+<body>
+
+    <center>
+        <div class="instagram-login-signup-content">
+
+            <div class="instagram-login-signup-content-row-container">
+                <div class="instagram-login-signup-content-row">
+                    <div class="instagram-login-signup-mobile-view">
+                        <img src="/static/images/samsung1.png" height="550">
+                    </div>
+    
+    
+                    <div class="instagram-login-signup-controls">
+                        <div class="instagram-login-signup-border">
+                            <div class="instagram-login-content">
+                                <div class="instagram-signup-logo">
+                                    <i data-visualcompletion="css-img" aria-label="Instagram" class="" role="img" style="background-image: url(&quot;https://static.cdninstagram.com/rsrc.php/v3/yM/r/8n91YnfPq0s.png&quot;); background-position: 0px -52px; background-size: auto; width: 175px; height: 51px; background-repeat: no-repeat; display: inline-block;"></i>
+                                </div>
+                
+                                <strong class="instagram-signup-message">Sign up to see photos and videos from your friends.</strong>
+
+                                <input id="fullname" placeholder="Full Name">
+                                <input id="username" placeholder="Username" spellcheck="false">
+                                <input id="password" type="password" placeholder="Password" spellcheck="false">
+                                <input id="email" type="email" placeholder="Email address">
+                                <select id="gender">
+                                    <option selected disabled hidden value="-1">Select your gender...</option>
+                                    <option value="0">Male</option>
+                                    <option value="1">Female</option>
+                                </select>
+                                <button id="signup-button" disabled>Sign up</button>
+            
+                                 <br>
+                                 <a href="/" class="instagram-login-redirect-button-text">Reset your password?</a>
+                                 <a id="instagram-server-response" class="instagram-server-response"></a>
+                            </div>
+                        </div>
+            
+                        <div class="instagram-login-signup-border">
+            
+                            <div class="instagram-signup-redirect-content">
+                                <a>Have an account?<a href="/accounts/login" class="instagram-login-redirect-button-text">Log in</a></a>
+                            </div>
+                            
+                        </div>
+                    </div>
+    
+                </div>
+            </div>
+
+            
+
+           
+        </div>
+    </center>
+
+</body>
+
+<script>
+    let xmr = new XMR();
+
+
+    let fullname_element = document.getElementById('fullname');
+    let username_element = document.getElementById('username');
+    let password_element = document.getElementById('password');
+    let email_element = document.getElementById('email');
+    let gender_combo_box = document.getElementById('gender');
+    let server_response_element = document.getElementById('instagram-server-response');
+    let signup_button = document.getElementById('signup-button');
+
+    let can_click_signup_fn = (e) => {
+        
+        let fullname = document.getElementById('fullname').value;
+        let username = document.getElementById('username').value;
+        let password = document.getElementById('password').value;
+        let email = document.getElementById('email').value;
+        let gender = document.getElementById('gender').value;
+
+
+        signup_button.disabled = !(username.length != 0  && password.length >= 6 && email.length != 0 && gender != -1);
+    };
+    
+
+    fullname_element.onchange = fullname_element.onkeydown = can_click_signup_fn;
+    username_element.onchange = username_element.onkeydown = can_click_signup_fn;
+    password_element.onchange = password_element.onkeydown = can_click_signup_fn;
+    email_element.onchange = email_element.onkeydown = can_click_signup_fn;
+    gender_combo_box.onchange = can_click_signup_fn;
+    
+
+    signup_button.onclick = (e) => {
+
+        let fullname = document.getElementById('fullname').value;
+        let username = document.getElementById('username').value;
+        let password = document.getElementById('password').value;
+        let email = document.getElementById('email').value;
+        let gender = Number.parseInt(document.getElementById('gender').value);
+
+        (async () => {
+            xmr.Guest.register(fullname, username, password, email, gender)
+                .then((result) => {
+                    if (result['error'] === null) {
+                        window.location.href = '/';
+                    }
+                })
+                .catch((e) => {
+                    server_response_element.style.display = 'block';
+                    try {
+                        let error_json = JSON.parse(e.message);
+                        server_response_element.innerText = error_json['error'];
+                    }
+                    catch {
+                        server_response_element.innerText = 'There was an error with your request.';
+                    } 
+                    
+                });
+            
+        })();
+    }
+</script>
+</html>
