@@ -1,0 +1,29 @@
+{
+	"expo": {
+		"name": "ig.xmr",
+		"slug": "ig.xmr",
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"icon": "./assets/ig_icon.png",
+		"userInterfaceStyle": "light",
+		"splash": {
+			"image": "./assets/ig_splash128.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#ffffff"
+		},
+		"assetBundlePatterns": ["**/*"],
+		"ios": {
+			"supportsTablet": true
+		},
+		"android": {
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/ig_icon.png",
+				"backgroundColor": "#ffffff"
+			}
+		},
+		"web": {
+			"favicon": "./assets/ig_icon.png"
+		},
+		"plugins": ["expo-secure-store"]
+	}
+}
