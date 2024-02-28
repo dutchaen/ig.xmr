@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import instagram_logo from '../assets/instagram-logo.png';
 import InstagramButton from '../components/InstagramButton';
+import XMR from '../xmr';
 
 export default function SignupScreen({ navigation }) {
 	const [xmr, _] = React.useState(new XMR());
