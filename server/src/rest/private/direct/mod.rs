@@ -302,7 +302,7 @@ async fn get_messages(
                 .await?;
 
         let is_seen = match is_mine {
-            true => Some(viewers.iter().find(|x| x.id != my_base.id).is_none()),
+            true => Some(viewers.iter().find(|x| x.id != my_base.id).is_some()),
             false => None,
         };
 
@@ -537,9 +537,11 @@ async fn send_text(
 async fn like_message(
     session: Session,
     manager: web::Data<crate::Manager>,
-    thread_id: web::Path<u64>,
-    message_id: web::Path<u64>,
+    params: web::Path<(u64, u64)>
 ) -> Result<HttpResponse, Box<dyn std::error::Error>> {
+
+    let (thread_id, message_id) = params.into_inner();
+
     let my_base = match kit::is_logged_in(&session) {
         Some(base_user) => base_user,
         None => {
@@ -555,7 +557,7 @@ async fn like_message(
             .fetch_all(&manager.pool)
             .await?;
 
-    let thread_id = thread_id.into_inner();
+    
 
     let in_inbox = inbox_thread_ids
         .iter()
@@ -567,7 +569,6 @@ async fn like_message(
     }
 
     let thread_messages_table = format!("IG_THREAD_{}_MESSAGES", thread_id);
-    let message_id = message_id.into_inner();
 
     let private_message: Option<PrivateMessage> = sqlx::query_as(&format!(
         "SELECT * FROM {} WHERE id = ?",
@@ -593,6 +594,42 @@ async fn like_message(
     .execute(&manager.pool)
     .await?;
 
+    let liker_models: Vec<PrivateIDModel> = sqlx::query_as(&format!("SELECT * FROM {}", thread_message_likes_table))
+        .fetch_all(&manager.pool)
+        .await?;
+
+    let likers = liker_models.iter()
+        .map(|x| x.id)
+        .collect::<Vec<_>>();
+
+
+    let thread_members_table = format!("IG_THREAD_{}_MEMBERS", thread_id);
+    let other_user: PrivateIDModel = sqlx::query_as(&format!(
+        "SELECT * FROM {} WHERE id != ?",
+        thread_members_table
+    ))
+        .bind(&my_base.id)
+        .fetch_one(&manager.pool)
+        .await?;
+
+    let event = LiveMessageEvent {
+        event: "message_liked",
+        thread_id: thread_id,
+        data: DirectMessage {
+            id: message.id,
+            text: message.text.to_owned(),
+            owner_id: message.owner_id,
+            created_at: message.created_at.to_owned(),
+            is_mine: message.owner_id == my_base.id,
+            likers,
+            is_seen: Some(true),
+            is_heart: message.is_heart,
+        },
+    };
+
+    let msg = event.to_string();
+    tokio::spawn(async move { manager.ws_send_message_to_id(other_user.id, &msg).await });
+
     return httpkit::send_json(
         200,
         json!({
@@ -605,9 +642,10 @@ async fn like_message(
 async fn unlike_message(
     session: Session,
     manager: web::Data<crate::Manager>,
-    thread_id: web::Path<u64>,
-    message_id: web::Path<u64>,
+    params: web::Path<(u64, u64)>
 ) -> Result<HttpResponse, Box<dyn std::error::Error>> {
+
+    let (thread_id, message_id) = params.into_inner();
     let my_base = match kit::is_logged_in(&session) {
         Some(base_user) => base_user,
         None => {
@@ -623,7 +661,6 @@ async fn unlike_message(
             .fetch_all(&manager.pool)
             .await?;
 
-    let thread_id = thread_id.into_inner();
 
     let in_inbox = inbox_thread_ids
         .iter()
@@ -635,7 +672,6 @@ async fn unlike_message(
     }
 
     let thread_messages_table = format!("IG_THREAD_{}_MESSAGES", thread_id);
-    let message_id = message_id.into_inner();
 
     let private_message: Option<PrivateMessage> = sqlx::query_as(&format!(
         "SELECT * FROM {} WHERE id = ?",
@@ -661,6 +697,42 @@ async fn unlike_message(
     .execute(&manager.pool)
     .await?;
 
+    let liker_models: Vec<PrivateIDModel> = sqlx::query_as(&format!("SELECT * FROM {}", thread_message_likes_table))
+        .fetch_all(&manager.pool)
+        .await?;
+
+    let likers = liker_models.iter()
+        .map(|x| x.id)
+        .collect::<Vec<_>>();
+
+
+    let thread_members_table = format!("IG_THREAD_{}_MEMBERS", thread_id);
+    let other_user: PrivateIDModel = sqlx::query_as(&format!(
+        "SELECT * FROM {} WHERE id != ?",
+        thread_members_table
+    ))
+        .bind(&my_base.id)
+        .fetch_one(&manager.pool)
+        .await?;
+
+    let event = LiveMessageEvent {
+        event: "message_unliked",
+        thread_id: thread_id,
+        data: DirectMessage {
+            id: message.id,
+            text: message.text.to_owned(),
+            owner_id: message.owner_id,
+            created_at: message.created_at.to_owned(),
+            is_mine: message.owner_id == my_base.id,
+            likers,
+            is_seen: Some(true),
+            is_heart: message.is_heart,
+        },
+    };
+
+    let msg = event.to_string();
+    tokio::spawn(async move { manager.ws_send_message_to_id(other_user.id, &msg).await });
+
     return httpkit::send_json(
         200,
         json!({
@@ -673,9 +745,10 @@ async fn unlike_message(
 async fn delete_message(
     session: Session,
     manager: web::Data<crate::Manager>,
-    thread_id: web::Path<u64>,
-    message_id: web::Path<u64>,
+    params: web::Path<(u64, u64)>
 ) -> Result<HttpResponse, Box<dyn std::error::Error>> {
+
+    let (thread_id, message_id) = params.into_inner();
     let my_base = match kit::is_logged_in(&session) {
         Some(base_user) => base_user,
         None => {
@@ -691,8 +764,6 @@ async fn delete_message(
             .fetch_all(&manager.pool)
             .await?;
 
-    let thread_id = thread_id.into_inner();
-
     let in_inbox = inbox_thread_ids
         .iter()
         .find(|x| x.id == thread_id)
@@ -703,10 +774,9 @@ async fn delete_message(
     }
 
     let thread_messages_table = format!("IG_THREAD_{}_MESSAGES", thread_id);
-    let message_id = message_id.into_inner();
 
     let private_message: Option<PrivateMessage> = sqlx::query_as(&format!(
-        "SELECT * FROM {} WHERE id = ? AND sender = ?",
+        "SELECT * FROM {} WHERE id = ? AND owner_id = ?",
         thread_messages_table
     ))
     .bind(&message_id)
@@ -720,7 +790,7 @@ async fn delete_message(
     };
 
     sqlx::query(&format!(
-        "DELETE FROM {} WHERE id = ? AND sender = ?",
+        "DELETE FROM {} WHERE id = ? AND owner_id = ?",
         thread_messages_table
     ))
     .bind(&message_id)
@@ -800,6 +870,25 @@ async fn send_heart(
 
     let thread_members_table = format!("IG_THREAD_{thread_id}_MEMBERS");
 
+
+    let tables = [
+        format!("IG_THREAD_{}_MESSAGE_{}_LIKES", thread_id, result.last_insert_id()),
+        format!("IG_THREAD_{}_MESSAGE_{}_VIEWEDBY", thread_id, result.last_insert_id()),
+    ];
+
+    for table in tables {
+        sqlx::query(&format!(
+            r#"
+                CREATE TABLE {} (
+                    id BIGINT UNSIGNED PRIMARY KEY
+                );
+                "#,
+            table
+        ))
+        .execute(&manager.pool)
+        .await?;
+    }
+
     let other_user: PrivateIDModel = sqlx::query_as(&format!(
         "SELECT * FROM {} WHERE id != ?",
         thread_members_table
@@ -834,4 +923,106 @@ async fn send_heart(
             "error": null
         }),
     );
+}
+
+#[post("/thread/{thread_id}/message/{message_id}/seen")]
+async fn seen_message(
+    session: Session,
+    manager: web::Data<crate::Manager>,
+    params: web::Path<(u64, u64)>
+) -> Result<HttpResponse, Box<dyn std::error::Error>> {
+
+    let (thread_id, message_id) = params.into_inner();
+
+    let my_base = match kit::is_logged_in(&session) {
+        Some(base_user) => base_user,
+        None => {
+            session.purge();
+            return httpkit::redirect("/");
+        }
+    };
+
+    let inbox_table_name = format!("USER_{}_INBOX", my_base.id);
+
+    let inbox_thread_ids: Vec<PrivateIDModel> =
+        sqlx::query_as(&format!("SELECT * FROM {}", inbox_table_name))
+            .fetch_all(&manager.pool)
+            .await?;
+
+    let in_inbox = inbox_thread_ids
+        .iter()
+        .find(|x| x.id == thread_id)
+        .is_some();
+
+    if !in_inbox {
+        return httpkit::http_json_error("What?");
+    }
+
+    let thread_messages_table = format!("IG_THREAD_{}_MESSAGES", thread_id);
+
+    let private_message: Option<PrivateMessage> = sqlx::query_as(&format!(
+        "SELECT * FROM {} WHERE id = ?",
+        thread_messages_table
+    ))
+    .bind(&message_id)
+    .fetch_optional(&manager.pool)
+    .await?;
+
+    let message = match private_message {
+        Some(private_message) => private_message,
+        None => return httpkit::http_json_error("What?"),
+    };
+
+    let likes_table_name = format!("IG_THREAD_{}_MESSAGE_{}_LIKES", thread_id, message.id);
+    let viewedby_table_name = format!("IG_THREAD_{}_MESSAGE_{}_VIEWEDBY", thread_id, message.id);
+    let _ = sqlx::query(&format!("INSERT INTO {} VALUES (?)", viewedby_table_name))
+        .bind(&my_base.id)
+        .execute(&manager.pool)
+        .await;
+
+
+    let liker_models: Vec<PrivateIDModel> = sqlx::query_as(&format!("SELECT * FROM {}", likes_table_name))
+        .fetch_all(&manager.pool)
+        .await?;
+
+    let likers = liker_models.iter()
+        .map(|x| x.id)
+        .collect::<Vec<_>>();
+
+
+    let thread_members_table = format!("IG_THREAD_{}_MEMBERS", thread_id);
+    let other_user: PrivateIDModel = sqlx::query_as(&format!(
+        "SELECT * FROM {} WHERE id != ?",
+        thread_members_table
+    ))
+        .bind(&my_base.id)
+        .fetch_one(&manager.pool)
+        .await?;
+
+    let event = LiveMessageEvent {
+        event: "message_seen",
+        thread_id: thread_id,
+        data: DirectMessage {
+            id: message.id,
+            text: message.text.to_owned(),
+            owner_id: message.owner_id,
+            created_at: message.created_at.to_owned(),
+            is_mine: message.owner_id == my_base.id,
+            likers,
+            is_seen: Some(true),
+            is_heart: message.is_heart,
+        },
+    };
+
+    let msg = serde_json::to_string(&event)?;
+    tokio::spawn(async move { manager.ws_send_message_to_id(other_user.id, &msg).await });
+
+
+    return httpkit::send_json(
+        200,
+        json!({
+            "error": null
+        }),
+    );
+
 }
