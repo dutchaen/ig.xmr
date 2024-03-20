@@ -137,12 +137,26 @@ async fn get_post_comments(
     let mut map: HashMap<u64, ViewableUser> = HashMap::new();
 
     for comment in comments.iter() {
+
+
+        let mut is_liked_by_me: Option<bool> = None;
+        if let Some(base) = &base_user {
+            is_liked_by_me = kit::is_comment_liked_by_user(base.id, post.id, comment.id, &manager).await?;
+        }
+
+        let like_count = kit::get_comment_likes_count(post.id, comment.id, &manager).await?;
+
+
+
         match map.get(&comment.owner_id) {
+
             Some(viewable_user) => {
                 let comment = ViewableComment {
                     id: comment.id,
                     owner: viewable_user.to_owned(),
                     content: comment.content.to_owned(),
+                    is_liked_by_me,
+                    like_count,
                 };
 
                 viewable_comments.push(comment);
@@ -168,6 +182,8 @@ async fn get_post_comments(
                     id: comment.id,
                     owner: viewable.to_owned(),
                     content: comment.content.to_owned(),
+                    is_liked_by_me,
+                    like_count,
                 };
                 viewable_comments.push(comment);
             }
@@ -176,4 +192,25 @@ async fn get_post_comments(
 
     let comments_json = serde_json::to_value(&viewable_comments)?;
     return httpkit::send_json(200, comments_json);
+}
+
+#[get("/explore_feed")]
+async fn get_explore(
+    manager: web::Data<crate::Manager>,
+) -> Result<HttpResponse, Box<dyn std::error::Error>> {
+
+
+    let posts: Vec<PostInfo> = sqlx::query_as("SELECT * FROM Posts LIMIT 99")
+        .fetch_all(&manager.pool)
+        .await?;
+
+
+    let mut base_posts = vec![];
+    for post in posts {
+        let base_post = post.to_base_post_info(&None, &manager).await?;
+        base_posts.push(base_post);
+    }
+
+    let json_data = serde_json::to_value(base_posts)?;
+    return httpkit::send_json(200, json_data);
 }
