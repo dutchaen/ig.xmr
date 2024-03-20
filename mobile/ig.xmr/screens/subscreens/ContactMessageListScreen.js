@@ -223,6 +223,7 @@ function InstagramMessage({ xmr, id, thread_id, text, is_heart, is_mine, is_last
 	const [isLikedByMe, setIsLikedByMe] = React.useState(false);
 	React.useEffect(() => {
 
+		if (message_likers.length !== 0)
 		for (let i = 0; i < message_likers.length; i++) {
 			if (message_likers[i] === currentUser.id) {
 				setIsLikedByMe(true);
@@ -271,7 +272,7 @@ function InstagramMessage({ xmr, id, thread_id, text, is_heart, is_mine, is_last
 
 	let content = is_heart ? <InstagramMessageHeart /> : <Text>{text}</Text>;
 	let message_styles = [styles.message];
-	let liked_message_styles = [isLikedByMe ? {position: 'absolute', right: 0, bottom: -5} : {position: 'absolute', left: 0, bottom: -5}];
+	let liked_message_styles = [is_mine ? {position: 'absolute', right: 0, bottom: -5} : {position: 'absolute', left: 0, bottom: -5}];
 
 	if (is_mine) {
 		message_styles.push(styles.my_message);
@@ -298,7 +299,7 @@ function InstagramMessage({ xmr, id, thread_id, text, is_heart, is_mine, is_last
 
 				</View>
 				{
-					isLikedByMe && !is_heart ? 
+					isLikedByMe ? 
 						<View style={liked_message_styles}>
 							<Text>💗</Text>
 						</View> : 
