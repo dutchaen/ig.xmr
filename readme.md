@@ -16,8 +16,8 @@ i just wanted to recreate instagram
 - [x] Change Password
 - [ ] Explore Feed
 - [ ] Like & Unlike Comments
-- [ ] Like & Unlike Messages
-- [ ] Real-Time Activity for Direct Messaging
+- [x] Like & Unlike Messages
+- [x] Real-Time Activity for Direct Messaging
 - [ ] Notifications
 - [ ] Save Posts
 - [ ] Delete Posts
