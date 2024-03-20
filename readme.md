@@ -4,7 +4,7 @@ instagram clone made using react native, rust &amp; html/css/js
 ## why?
 i just wanted to recreate instagram
 
-## progress on added features [2/28/24]
+## progress on added features [3/20/24]
 - [x] Login & Register
 - [x] Follow & Unfollow
 - [x] Real-Time Direct Messaging
