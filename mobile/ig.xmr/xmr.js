@@ -4,6 +4,10 @@ export function sleep(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+export function getProfilePhotoUri(username) {
+	return HTTPS_PREFIX + `/${username}/avatar?time=${new Date()}`;
+}
+
 class XMR {
 	constructor() {
 		this.Guest = {
@@ -568,6 +572,28 @@ class XMR {
 					);
 
 					const json = await response.json();
+					if (response.status !== 200) {
+						console.log(json);
+						throw new Error(JSON.stringify(json));
+					}
+
+					return json;
+				},
+				seen_message: async (thread_id, message_id) => {
+					console.log(`ThreadId := ${typeof thread_id} && MessageId := ${typeof message_id}`);
+					const response = await fetch(
+						HTTPS_PREFIX +
+							`/rest/private/direct/thread/${thread_id}/message/${message_id}/seen`,
+						{
+							method: 'POST',
+							credentials: 'include',
+						}
+					);
+
+					let data = await response.text();
+					console.log(data);
+
+					const json = JSON.parse(data);
 					if (response.status !== 200) {
 						console.log(json);
 						throw new Error(JSON.stringify(json));
