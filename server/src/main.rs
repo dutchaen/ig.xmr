@@ -164,7 +164,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                     .service(rest::private::direct::like_message) 
                                     .service(rest::private::direct::unlike_message) 
                                     .service(rest::private::direct::delete_message) 
-                                    .service(rest::private::direct::send_heart), 
+                                    .service(rest::private::direct::send_heart)
+                                    .service(rest::private::direct::seen_message),
                             )
                             .service(
                                 web::scope("/accounts")

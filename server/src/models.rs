@@ -243,6 +243,8 @@ pub struct ViewableComment {
     pub id: u64,
     pub owner: ViewableUser,
     pub content: String,
+    pub is_liked_by_me: Option<bool>,
+    pub like_count: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]

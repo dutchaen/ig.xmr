@@ -362,3 +362,39 @@ pub async fn is_following(
 
     return Ok(row.is_some());
 }
+
+pub async fn is_comment_liked_by_user(
+    user_id: u64,
+    post_id: u64,
+    comment_id: u64,
+    manager: &Manager
+) -> Result<Option<bool>, Box<dyn std::error::Error>> {
+
+    let table_name = format!("POST_{}_COMMENT_{}_LIKES", post_id, comment_id);
+
+    let result = sqlx::query(&format!("SELECT * FROM {} WHERE id = ?", table_name))
+        .bind(&user_id)
+        .fetch_all(&manager.pool)
+        .await;
+
+    if let Err(_) = &result {
+        return Ok(None);
+    }
+
+    let entries = result.unwrap();
+
+    Ok(Some(!entries.is_empty()))
+}
+
+pub async fn get_comment_likes_count(
+    post_id: u64,
+    comment_id: u64,
+    manager: &Manager
+) -> Result<u64, Box<dyn std::error::Error>> {
+    let table_name = format!("POST_{}_COMMENT_{}_LIKES", post_id, comment_id);
+    let liker_owner_ids = sqlx::query(&format!("SELECT * FROM {}", table_name))
+        .fetch_all(&manager.pool)
+        .await?;
+
+    return Ok(liker_owner_ids.len() as u64);
+}
