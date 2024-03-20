@@ -398,7 +398,7 @@ async fn create_comment(
     );
 
     sqlx::query(&format!(
-        "CREATE TABLE {} ( id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT )",
+        "CREATE TABLE {} ( id BIGINT UNSIGNED PRIMARY KEY )",
         post_comment_likes_table_name
     ))
     .execute(&manager.pool)
@@ -416,9 +416,11 @@ async fn create_comment(
 async fn destroy_comment(
     session: Session,
     manager: web::Data<crate::Manager>,
-    post_id: web::Path<u64>,
-    comment_id: web::Path<u64>,
+    params: web::Path<(u64, u64)>
 ) -> Result<HttpResponse, Box<dyn std::error::Error>> {
+
+    let (post_id, comment_id) = params.into_inner();
+
     let my_base = match kit::is_logged_in(&session) {
         Some(base_user) => base_user,
         None => {
@@ -428,7 +430,7 @@ async fn destroy_comment(
     };
 
     let post_info: Option<PostInfo> = sqlx::query_as("SELECT * FROM Posts WHERE id = ?")
-        .bind(post_id.into_inner())
+        .bind(post_id)
         .fetch_optional(&manager.pool)
         .await?;
 
@@ -439,7 +441,7 @@ async fn destroy_comment(
     let post = post_info.unwrap();
     let post_comments_table_name = format!("POST_{}_COMMENTS", post.id);
 
-    let comment_id = comment_id.into_inner();
+    let comment_id = comment_id;
 
     let comment_model: Option<CommentModel> = sqlx::query_as(&format!(
         "SELECT * FROM {} WHERE id = ? AND owner_id = ?",
@@ -484,9 +486,10 @@ async fn destroy_comment(
 async fn like_comment(
     session: Session,
     manager: web::Data<crate::Manager>,
-    post_id: web::Path<u64>,
-    comment_id: web::Path<u64>,
+    params: web::Path<(u64, u64)>
 ) -> Result<HttpResponse, Box<dyn std::error::Error>> {
+
+    let (post_id, comment_id) = params.into_inner();
     let my_base = match kit::is_logged_in(&session) {
         Some(base_user) => base_user,
         None => {
@@ -496,7 +499,7 @@ async fn like_comment(
     };
 
     let post_info: Option<PostInfo> = sqlx::query_as("SELECT * FROM Posts WHERE id = ?")
-        .bind(post_id.into_inner())
+        .bind(post_id)
         .fetch_optional(&manager.pool)
         .await?;
 
@@ -507,7 +510,6 @@ async fn like_comment(
     let post = post_info.unwrap();
     let post_comments_table_name = format!("POST_{}_COMMENTS", post.id);
 
-    let comment_id = comment_id.into_inner();
 
     let comment_model: Option<CommentModel> = sqlx::query_as(&format!(
         "SELECT * FROM {} WHERE id = ?",
@@ -523,6 +525,11 @@ async fn like_comment(
 
     let comment = comment_model.unwrap();
     let post_comment_likes_table_name = format!("POST_{}_COMMENT_{}_LIKES", post.id, comment.id);
+
+
+    if let Ok(Some(true)) = kit::is_comment_liked_by_user(my_base.id, post.id, comment_id, &manager).await {
+        return httpkit::http_json_error("You have already liked this comment. Try liking another comment.");
+    }
 
     sqlx::query(&format!(
         "INSERT INTO {} VALUES (?)",
@@ -544,9 +551,10 @@ async fn like_comment(
 async fn unlike_comment(
     session: Session,
     manager: web::Data<crate::Manager>,
-    post_id: web::Path<u64>,
-    comment_id: web::Path<u64>,
+    params: web::Path<(u64, u64)>
 ) -> Result<HttpResponse, Box<dyn std::error::Error>> {
+
+    let (post_id, comment_id) = params.into_inner();
     let my_base = match kit::is_logged_in(&session) {
         Some(base_user) => base_user,
         None => {
@@ -556,7 +564,7 @@ async fn unlike_comment(
     };
 
     let post_info: Option<PostInfo> = sqlx::query_as("SELECT * FROM Posts WHERE id = ?")
-        .bind(post_id.into_inner())
+        .bind(post_id)
         .fetch_optional(&manager.pool)
         .await?;
 
@@ -566,8 +574,6 @@ async fn unlike_comment(
 
     let post = post_info.unwrap();
     let post_comments_table_name = format!("POST_{}_COMMENTS", post.id);
-
-    let comment_id = comment_id.into_inner();
 
     let comment_model: Option<CommentModel> = sqlx::query_as(&format!(
         "SELECT * FROM {} WHERE id = ?",
@@ -583,6 +589,10 @@ async fn unlike_comment(
 
     let comment = comment_model.unwrap();
     let post_comment_likes_table_name = format!("POST_{}_COMMENT_{}_LIKES", post.id, comment.id);
+
+    if let Ok(Some(false)) = kit::is_comment_liked_by_user(my_base.id, post.id, comment_id, &manager).await {
+        return httpkit::http_json_error("You have not liked this comment.");
+    }
 
     sqlx::query(&format!(
         "DELETE FROM {} WHERE id = ?",
