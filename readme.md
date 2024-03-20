@@ -14,10 +14,10 @@ i just wanted to recreate instagram
 - [x] Search for Users
 - [x] Edit Profile & Set Username
 - [x] Change Password
-- [ ] Explore Feed
-- [ ] Like & Unlike Comments
 - [x] Like & Unlike Messages
 - [x] Real-Time Activity for Direct Messaging
+- [ ] Explore Feed
+- [ ] Like & Unlike Comments
 - [ ] Notifications
 - [ ] Save Posts
 - [ ] Delete Posts
