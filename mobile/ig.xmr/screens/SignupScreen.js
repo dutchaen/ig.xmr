@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import instagram_logo from '../assets/instagram-logo.png';
 import InstagramButton from '../components/InstagramButton';
-import XMR from '../xmr';
+import XMR, { sleep } from '../xmr';
+import * as SecureStore from 'expo-secure-store';
 
 export default function SignupScreen({ navigation }) {
 	const [xmr, _] = React.useState(new XMR());
@@ -98,9 +99,9 @@ export default function SignupScreen({ navigation }) {
 						console.log('Pressed button');
 						setControlsEnabled(false);
 
-						await delay(3000);
+						await sleep(3000);
 						try {
-							xmr.Guest.signup(username, password)
+							xmr.Guest.register(fullname, username, password, email, 0)
 								.then((data) => {
 									let cookie = data[0];
 									SecureStore.setItem('xmr-cookie', cookie);
