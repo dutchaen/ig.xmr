@@ -25,9 +25,19 @@ i just wanted to recreate instagram
 - [ ] Delete Account
 - [ ] Block Account
 
-## mobile & web register screens
-<div>
-    <img src="https://github.com/dutchaen/ig.xmr/blob/main/assets/register_web.png?raw=true" />
-    <img src="https://github.com/dutchaen/ig.xmr/blob/main/assets/register_mobile.png?raw=true"  />
+
+## preview of while logged in...
+
+<div style="display: flex;">
+     <img src="https://github.com/dutchaen/ig.xmr/blob/main/assets/edit_profile_mobile.jpg?raw=true" width="333px"/>
+     <img src="https://github.com/dutchaen/ig.xmr/blob/main/assets/direct_messaging_rt.jpg?raw=true" width="333px"/>
+     <img src="https://github.com/dutchaen/ig.xmr/blob/main/assets/screen_result_profile_view.jpg?raw=true" width="333px"/>
 </div>
+
+## mobile & web register screens
+<div style="display: flex;">
+    <img src="https://github.com/dutchaen/ig.xmr/blob/main/assets/register_web.png?raw=true" />
+    <img src="https://github.com/dutchaen/ig.xmr/blob/main/assets/register_mobile.png?raw=true" />
+</div>
+
 
